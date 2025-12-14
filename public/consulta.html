@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Consulta de Factura Electrónica</title>
+</head>
+<body>
+  <h1>Consulta de Documento Emitido</h1>
+  <form id="consultaForm">
+    <label for="clave">Clave electrónica:</label>
+    <input type="text" id="clave" name="clave" required>
+    <button type="submit">Consultar</button>
+    <button (click)="pedirToken()">Obtener Token</button>
+
+  </form>
+
+  <div id="resultado"></div>
+
+  <script>
+    document.getElementById('consultaForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const clave = document.getElementById('clave').value;
+
+      try {
+        const response = await fetch(`/api/facturas/${clave}`);
+        if (!response.ok) throw new Error('Error en la consulta');
+        const data = await response.json();
+
+        document.getElementById('resultado').innerHTML = `
+          <p><strong>Clave:</strong> ${data.clave}</p>
+          <p><strong>Cliente:</strong> ${data.cliente}</p>
+          <p><strong>Monto:</strong> ${data.monto}</p>
+          <p><strong>Estado:</strong> ${data.estado}</p>
+        `;
+      } catch (err) {
+        document.getElementById('resultado').innerHTML = `<p style="color:red;">${err.message}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>
