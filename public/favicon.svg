@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img">
+  <rect width="512" height="512" fill="#0F4C5C"/>
+  <rect x="140" y="56" width="232" height="200" rx="20" fill="#F5F8FA"/>
+  <polygon points="300,56 372,56 372,128" fill="#0F4C5C"/>
+  <polygon points="300,56 300,128 372,128" fill="#38B2AC"/>
+  <rect x="176" y="140" width="140" height="12" rx="6" fill="#A0B9C3"/>
+  <rect x="176" y="168" width="140" height="12" rx="6" fill="#A0B9C3"/>
+  <rect x="176" y="196" width="90" height="12" rx="6" fill="#A0B9C3"/>
+  <text x="256" y="360" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="120" font-weight="700" fill="#F5F8FA" letter-spacing="12">SCI</text>
+  <rect x="176" y="400" width="160" height="24" rx="12" fill="#38B2AC"/>
+</svg>

@@ -23,6 +23,31 @@ const sqlConfig = {
 app.use(cors());
 app.use(express.json());
 
+// MIME y caché para PWA / iconos (evita que Android reutilice el favicon de Angular)
+express.static.mime.define({ 'application/manifest+json': ['webmanifest'] });
+app.use((req, res, next) => {
+  const p = req.path.toLowerCase();
+  if (
+    p === '/' ||
+    p === '/index.html' ||
+    p === '/manifest.webmanifest' ||
+    p === '/sw.js' ||
+    p.endsWith('.webmanifest') ||
+    p.includes('sci-icon') ||
+    p.includes('favicon') ||
+    p.includes('apple-touch-icon')
+  ) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+  if (p === '/sw.js') {
+    res.setHeader('Service-Worker-Allowed', '/');
+    res.type('application/javascript');
+  }
+  next();
+});
+
 // Conexión persistente a SQL Server
 let poolPromise;
 async function getPool() {
@@ -129,11 +154,81 @@ app.post('/api/hacienda/token', async (req, res) => {
   }
 });
 
+// GET: reporte de documentos electrónicos (inventario filtrado + resumen)
+app.get('/api/reportes/documentos', async (req, res) => {
+  const { desde, hasta, estado, q } = req.query;
+  try {
+    const pool = await getPool();
+    const result = await pool.request().query('SELECT * FROM archivoshacienda');
+    let rows = result.recordset || [];
+
+    const qNorm = String(q || '').trim().toLowerCase();
+    const estadoNorm = String(estado || '').trim().toLowerCase();
+    const desdeNorm = String(desde || '').trim();
+    const hastaNorm = String(hasta || '').trim();
+
+    rows = rows.filter((doc) => {
+      const estadoDoc = String(doc.estado ?? '').toLowerCase();
+      const fecha = String(doc.fecha ?? doc.fechadocumento ?? '');
+      const blob = [
+        doc.claveelectronica,
+        doc.clave,
+        doc.cliente,
+        doc.nombrecliente,
+        doc.estado,
+      ]
+        .join(' ')
+        .toLowerCase();
+
+      if (qNorm && !blob.includes(qNorm)) return false;
+      if (estadoNorm && !estadoDoc.includes(estadoNorm)) return false;
+      if (desdeNorm && fecha && fecha < desdeNorm) return false;
+      if (hastaNorm && fecha && fecha > hastaNorm) return false;
+      return true;
+    });
+
+    const toNumber = (doc) => {
+      const raw = doc.monto ?? doc.total ?? 0;
+      const n = Number(String(raw).replace(/[^0-9.-]/g, ''));
+      return Number.isFinite(n) ? n : 0;
+    };
+
+    const aceptados = rows.filter((d) => /acept|ok|autoriz/i.test(String(d.estado ?? ''))).length;
+    const rechazados = rows.filter((d) => /rechaz|error|anul/i.test(String(d.estado ?? ''))).length;
+
+    res.json({
+      total: rows.length,
+      aceptados,
+      rechazados,
+      pendientes: Math.max(rows.length - aceptados - rechazados, 0),
+      montoTotal: rows.reduce((acc, d) => acc + toNumber(d), 0),
+      items: rows.slice(0, 100),
+    });
+  } catch (err) {
+    console.error('Error generando reporte:', err);
+    res.status(500).json({ error: 'Error generando el reporte' });
+  }
+});
+
 // Servir Angular compilado
 const distFolder = path.join(__dirname, 'dist/servidordocumentos/browser');
-app.use(express.static(distFolder));
+app.use(
+  express.static(distFolder, {
+    setHeaders(res, filePath) {
+      const base = path.basename(filePath).toLowerCase();
+      if (base === 'index.html' || base === 'sw.js' || base.endsWith('.webmanifest')) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+      }
+    },
+  })
+);
 
 app.use((req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.sendFile(path.join(distFolder, 'index.html'));
 });
 

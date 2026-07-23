@@ -1,0 +1,116 @@
+.app-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: calc(0.7rem + var(--sci-safe-top)) 0.85rem 0.75rem;
+  background: linear-gradient(180deg, var(--sci-teal) 0%, var(--sci-teal-dark) 100%);
+  color: #f5f8fa;
+  box-shadow: 0 2px 12px rgba(10, 53, 64, 0.28);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.brand-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.brand-text {
+  min-width: 0;
+}
+
+.brand-text h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+.brand-text p {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  color: rgba(245, 248, 250, 0.78);
+}
+
+.app-nav {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 0.1rem;
+}
+
+.app-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.app-nav a {
+  flex: 1 1 0;
+  text-align: center;
+  text-decoration: none;
+  color: rgba(245, 248, 250, 0.86);
+  font-weight: 600;
+  font-size: 0.82rem;
+  padding: 0.55rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+}
+
+.app-nav a.active,
+.app-nav a:hover {
+  color: var(--sci-teal-dark);
+  background: #fff;
+  border-color: #fff;
+}
+
+.app-main {
+  flex: 1;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1rem 1rem calc(1.25rem + var(--sci-safe-bottom));
+}
+
+@media (min-width: 720px) {
+  .app-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-inline: 1.5rem;
+  }
+
+  .brand-text h1 {
+    font-size: 1.5rem;
+  }
+
+  .app-nav a {
+    flex: 0 0 auto;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.9rem;
+  }
+
+  .app-main {
+    padding: 1.5rem 1.5rem 2rem;
+  }
+}

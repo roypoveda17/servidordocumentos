@@ -1,22 +1,38 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class HaciendaService {
   constructor(private http: HttpClient) {}
 
+  consultarFacturaLocal(clave: string): Observable<Record<string, unknown>> {
+    return this.http.get<Record<string, unknown>>(`/api/facturas/${encodeURIComponent(clave)}`);
+  }
+
+  consultarFacturaHacienda(clave: string): Observable<Record<string, unknown>> {
+    return this.http.get<Record<string, unknown>>(
+      `/api/hacienda/facturas/${encodeURIComponent(clave)}`
+    );
+  }
+
+  crearTokenHacienda(): Observable<{ mensaje: string; token: string }> {
+    return this.http.post<{ mensaje: string; token: string }>('/api/hacienda/token', {});
+  }
+
+  /** Conservado por compatibilidad con llamadas directas a Hacienda. */
   getToken(usuario: string, password: string, clientId: string, urlToken: string): Observable<any> {
-    const body = new HttpParams()
-      .set('client_id', clientId)
-      .set('grant_type', 'password')
-      .set('username', usuario)
-      .set('password', password);
+    const body = new URLSearchParams({
+      client_id: clientId,
+      grant_type: 'password',
+      username: usuario,
+      password,
+    });
 
     return this.http.post<any>(urlToken, body.toString(), {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
   }
 }

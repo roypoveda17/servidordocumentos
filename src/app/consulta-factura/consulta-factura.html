@@ -1,1 +1,63 @@
-<p>consulta-factura works!</p>
+<section class="consulta">
+  <header class="consulta-header">
+    <h2>Consulta de factura</h2>
+    <p>Buscá un documento por su clave electrónica.</p>
+  </header>
+
+  <form class="consulta-form" (ngSubmit)="consultar()">
+    <label for="clave">Clave electrónica</label>
+    <input
+      id="clave"
+      name="clave"
+      type="text"
+      inputmode="numeric"
+      autocomplete="off"
+      placeholder="Ingresá la clave de 50 dígitos"
+      [ngModel]="clave()"
+      (ngModelChange)="clave.set($event)"
+      [disabled]="cargando()"
+      required
+    />
+
+    <div class="actions">
+      <button type="submit" class="btn primary" [disabled]="cargando()">
+        {{ cargando() ? 'Consultando…' : 'Consultar' }}
+      </button>
+      <button type="button" class="btn secondary" (click)="pedirToken()" [disabled]="cargando()">
+        Obtener token
+      </button>
+    </div>
+  </form>
+
+  @if (tokenOk()) {
+    <p class="notice success" role="status">Token de Hacienda creado correctamente.</p>
+  }
+
+  @if (error()) {
+    <p class="notice error" role="alert">{{ error() }}</p>
+  }
+
+  @if (factura(); as data) {
+    <article class="resultado" aria-live="polite">
+      <h3>Resultado</h3>
+      <dl>
+        <div>
+          <dt>Clave</dt>
+          <dd class="wrap">{{ field('claveelectronica') !== '—' ? field('claveelectronica') : field('clave') }}</dd>
+        </div>
+        <div>
+          <dt>Cliente</dt>
+          <dd>{{ field('nombrecliente') !== '—' ? field('nombrecliente') : field('cliente') }}</dd>
+        </div>
+        <div>
+          <dt>Monto</dt>
+          <dd>{{ field('total') !== '—' ? field('total') : field('monto') }}</dd>
+        </div>
+        <div>
+          <dt>Estado</dt>
+          <dd>{{ field('estado') }}</dd>
+        </div>
+      </dl>
+    </article>
+  }
+</section>

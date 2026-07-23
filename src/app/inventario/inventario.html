@@ -1,0 +1,75 @@
+<section class="module inventario">
+  <header class="module-header">
+    <h2>Inventario</h2>
+    <p>Documentos electrónicos registrados en SCI.</p>
+  </header>
+
+  <div class="toolbar">
+    <label class="sr-only" for="buscar-inventario">Buscar</label>
+    <input
+      id="buscar-inventario"
+      type="search"
+      placeholder="Buscar clave, cliente o estado"
+      [ngModel]="busqueda()"
+      (ngModelChange)="busqueda.set($event)"
+      [disabled]="cargando()"
+    />
+    <button type="button" class="btn secondary" (click)="cargar()" [disabled]="cargando()">
+      {{ cargando() ? 'Cargando…' : 'Actualizar' }}
+    </button>
+  </div>
+
+  @if (error()) {
+    <p class="notice error" role="alert">{{ error() }}</p>
+  }
+
+  @if (!cargando() && !error() && filtrados().length === 0) {
+    <p class="notice empty">No hay documentos para mostrar.</p>
+  }
+
+  <div class="card-list" aria-live="polite">
+    @for (doc of filtrados(); track val(doc, 'claveelectronica', 'clave', 'id')) {
+      <article class="doc-card">
+        <div class="doc-card-top">
+          <span class="badge">{{ val(doc, 'estado') }}</span>
+          <span class="monto">{{ val(doc, 'monto', 'total') }}</span>
+        </div>
+        <h3>{{ val(doc, 'cliente', 'nombrecliente') }}</h3>
+        <p class="clave">{{ val(doc, 'claveelectronica', 'clave') }}</p>
+        <dl class="meta">
+          <div>
+            <dt>Fecha</dt>
+            <dd>{{ val(doc, 'fecha', 'fechadocumento', 'createdAt') }}</dd>
+          </div>
+          <div>
+            <dt>Tipo</dt>
+            <dd>{{ val(doc, 'tipo', 'tipodocumento') }}</dd>
+          </div>
+        </dl>
+      </article>
+    }
+  </div>
+
+  <div class="table-wrap" aria-hidden="true">
+    <table>
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Clave</th>
+          <th>Estado</th>
+          <th>Monto</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (doc of filtrados(); track val(doc, 'claveelectronica', 'clave', 'id')) {
+          <tr>
+            <td>{{ val(doc, 'cliente', 'nombrecliente') }}</td>
+            <td class="clave">{{ val(doc, 'claveelectronica', 'clave') }}</td>
+            <td>{{ val(doc, 'estado') }}</td>
+            <td>{{ val(doc, 'monto', 'total') }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>
