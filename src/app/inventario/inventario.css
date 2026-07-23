@@ -19,8 +19,9 @@
 
 .toolbar {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.65rem;
+  grid-template-columns: 1fr auto;
+  gap: 0.55rem;
+  align-items: center;
 }
 
 .toolbar input {
@@ -51,6 +52,8 @@
   background: color-mix(in srgb, var(--sci-accent) 18%, white);
   color: var(--sci-teal-dark);
   border: 1px solid color-mix(in srgb, var(--sci-accent) 35%, white);
+  padding-inline: 0.85rem;
+  white-space: nowrap;
 }
 
 .notice {
@@ -126,10 +129,15 @@
 .clave {
   margin: 0.35rem 0 0;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.82rem;
+  font-size: 0.75rem;
+  line-height: 1.35;
   color: var(--sci-muted);
   overflow-wrap: anywhere;
   word-break: break-all;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .meta {
@@ -201,11 +209,6 @@ td.clave {
 }
 
 @media (min-width: 720px) {
-  .toolbar {
-    grid-template-columns: 1fr auto;
-    align-items: center;
-  }
-
   .card-list {
     display: none;
   }
