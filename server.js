@@ -27,7 +27,7 @@ app.use(express.json());
 express.static.mime.define({ 'application/manifest+json': ['webmanifest'] });
 app.use((req, res, next) => {
   const p = req.path.toLowerCase();
-  res.setHeader('X-SCI-Build', '7');
+  res.setHeader('X-SCI-Build', '8');
   if (
     p === '/' ||
     p === '/index.html' ||
@@ -64,10 +64,175 @@ async function getPool() {
 app.get('/api/version', (_req, res) => {
   res.json({
     name: 'SCI',
-    build: 7,
+    build: 8,
     icon: 'sci-brand-7',
-    modules: ['consulta', 'inventario', 'reporte'],
+    modules: ['consulta', 'inventario', 'reporte', 'terminal'],
   });
+});
+
+// Catálogo demo para Terminal (fallback si no hay tabla productos)
+const DEMO_PRODUCTOS = [
+  { id: 'demo-1', codigo: 'CAF001', nombre: 'Café americano', precio: 1200, categoria: 'Bebidas' },
+  { id: 'demo-2', codigo: 'CAF002', nombre: 'Café con leche', precio: 1500, categoria: 'Bebidas' },
+  { id: 'demo-3', codigo: 'GAS001', nombre: 'Gaseosa 355ml', precio: 900, categoria: 'Bebidas' },
+  { id: 'demo-4', codigo: 'AGU001', nombre: 'Agua 600ml', precio: 700, categoria: 'Bebidas' },
+  { id: 'demo-5', codigo: 'SNA001', nombre: 'Empanada', precio: 1100, categoria: 'Comida' },
+  { id: 'demo-6', codigo: 'SNA002', nombre: 'Sandwich mixto', precio: 2500, categoria: 'Comida' },
+  { id: 'demo-7', codigo: 'SER001', nombre: 'Servicio técnico', precio: 15000, categoria: 'Servicios' },
+  { id: 'demo-8', codigo: 'VAR001', nombre: 'Artículo general', precio: 5000, categoria: 'General' },
+];
+
+const ventasMemoria = [];
+
+function toNumberSafe(raw) {
+  const n = Number(String(raw ?? 0).replace(/[^0-9.-]/g, ''));
+  return Number.isFinite(n) ? n : 0;
+}
+
+function normalizeProducto(row, index) {
+  const id = String(row.id ?? row.Id ?? row.codigo ?? row.Codigo ?? `p-${index}`);
+  const codigo = String(row.codigo ?? row.Codigo ?? row.sku ?? row.SKU ?? id);
+  const nombre = String(
+    row.nombre ?? row.Nombre ?? row.descripcion ?? row.Descripcion ?? row.producto ?? 'Producto'
+  );
+  const precio = toNumberSafe(row.precio ?? row.Precio ?? row.precioVenta ?? row.PrecioVenta ?? 0);
+  const categoria = row.categoria ?? row.Categoria ?? row.grupo ?? undefined;
+  return {
+    id,
+    codigo,
+    nombre,
+    precio,
+    ...(categoria ? { categoria: String(categoria) } : {}),
+  };
+}
+
+function filterProductos(list, q) {
+  const qNorm = String(q || '').trim().toLowerCase();
+  if (!qNorm) return list;
+  return list.filter((p) =>
+    [p.codigo, p.nombre, p.categoria || ''].join(' ').toLowerCase().includes(qNorm)
+  );
+}
+
+// GET: catálogo del terminal (productos SQL o demo)
+app.get('/api/terminal/productos', async (req, res) => {
+  const q = req.query.q;
+  try {
+    const pool = await getPool();
+    let rows = [];
+    let fuente = 'demo';
+
+    try {
+      const result = await pool.request().query(
+        'SELECT TOP 300 * FROM productos'
+      );
+      rows = result.recordset || [];
+      if (rows.length > 0) fuente = 'sql:productos';
+    } catch (_) {
+      try {
+        const result = await pool.request().query(
+          'SELECT TOP 300 * FROM inventario'
+        );
+        rows = result.recordset || [];
+        if (rows.length > 0) fuente = 'sql:inventario';
+      } catch (__) {
+        rows = [];
+      }
+    }
+
+    const productos =
+      rows.length > 0
+        ? filterProductos(rows.map((r, i) => normalizeProducto(r, i)), q)
+        : filterProductos(DEMO_PRODUCTOS, q);
+
+    res.json({
+      fuente: rows.length > 0 ? fuente : 'demo',
+      productos,
+    });
+  } catch (err) {
+    console.error('Error cargando productos terminal:', err.message);
+    res.json({
+      fuente: 'demo',
+      productos: filterProductos(DEMO_PRODUCTOS, q),
+    });
+  }
+});
+
+// POST: registrar venta en terminal
+app.post('/api/terminal/ventas', async (req, res) => {
+  try {
+    const body = req.body || {};
+    const items = Array.isArray(body.items) ? body.items : [];
+    if (items.length === 0) {
+      return res.status(400).json({ error: 'La venta no tiene ítems.' });
+    }
+
+    const pago = ['efectivo', 'tarjeta', 'sinpe'].includes(body.pago) ? body.pago : 'efectivo';
+    const cliente = String(body.cliente || 'Cliente contado').trim() || 'Cliente contado';
+    const normalizedItems = items.map((it, i) => ({
+      id: String(it.id ?? `item-${i}`),
+      codigo: String(it.codigo ?? ''),
+      nombre: String(it.nombre ?? 'Producto'),
+      precio: toNumberSafe(it.precio),
+      cantidad: Math.max(1, Math.floor(toNumberSafe(it.cantidad) || 1)),
+    }));
+
+    const subtotalCalc = normalizedItems.reduce((acc, it) => acc + it.precio * it.cantidad, 0);
+    const subtotal = toNumberSafe(body.subtotal) || Math.round(subtotalCalc * 100) / 100;
+    const iva = toNumberSafe(body.iva) || Math.round(subtotal * 0.13 * 100) / 100;
+    const total = toNumberSafe(body.total) || Math.round((subtotal + iva) * 100) / 100;
+
+    const now = new Date();
+    const ticket = `T${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(
+      now.getDate()
+    ).padStart(2, '0')}-${String(ventasMemoria.length + 1).padStart(4, '0')}`;
+
+    const venta = {
+      ticket,
+      cliente,
+      pago,
+      subtotal,
+      iva,
+      total,
+      fecha: now.toISOString(),
+      items: normalizedItems,
+      persistido: false,
+    };
+
+    try {
+      const pool = await getPool();
+      await pool
+        .request()
+        .input('ticket', sql.VarChar, ticket)
+        .input('cliente', sql.VarChar, cliente)
+        .input('pago', sql.VarChar, pago)
+        .input('subtotal', sql.Decimal(18, 2), subtotal)
+        .input('iva', sql.Decimal(18, 2), iva)
+        .input('total', sql.Decimal(18, 2), total)
+        .input('detalle', sql.NVarChar(sql.MAX), JSON.stringify(normalizedItems))
+        .query(`
+          INSERT INTO ventasterminal (ticket, cliente, pago, subtotal, iva, total, detalle, fecha)
+          VALUES (@ticket, @cliente, @pago, @subtotal, @iva, @total, @detalle, GETDATE())
+        `);
+      venta.persistido = true;
+    } catch (sqlErr) {
+      console.warn('Venta terminal en memoria (tabla ventasterminal no disponible):', sqlErr.message);
+      venta.persistido = false;
+    }
+
+    ventasMemoria.unshift(venta);
+    if (ventasMemoria.length > 200) ventasMemoria.length = 200;
+
+    res.status(201).json(venta);
+  } catch (err) {
+    console.error('Error registrando venta terminal:', err);
+    res.status(500).json({ error: 'No se pudo registrar la venta' });
+  }
+});
+
+// GET: últimas ventas del terminal (memoria del proceso)
+app.get('/api/terminal/ventas', (_req, res) => {
+  res.json({ total: ventasMemoria.length, items: ventasMemoria.slice(0, 50) });
 });
 
 // Variables en memoria para token (declaradas una sola vez)

@@ -1,5 +1,5 @@
-/* Service worker SCI build 7 — network-first, iconos nuevos sci-brand-7. */
-const CACHE = 'sci-shell-build-7';
+/* Service worker SCI build 8 — network-first, módulo Terminal. */
+const CACHE = 'sci-shell-build-8';
 const PRECACHE = [
   '/manifest.webmanifest',
   '/sci-brand-7-192.png',
