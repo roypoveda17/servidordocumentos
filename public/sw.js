@@ -1,5 +1,5 @@
 /* Service worker para instalar SCI como PWA con iconos propios (no Angular). */
-const CACHE = 'sci-shell-v4';
+const CACHE = 'sci-shell-v5';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -38,6 +38,12 @@ self.addEventListener('fetch', (event) => {
   }
 
   const url = new URL(request.url);
+
+  // Nunca interceptar APIs ni navegaciones cross-origin.
+  if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) {
+    return;
+  }
+
   const isIconOrManifest =
     url.pathname.includes('sci-icon') ||
     url.pathname.includes('favicon') ||
@@ -58,11 +64,15 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // App shell: red primero; si falla, caché.
   event.respondWith(
     fetch(request)
       .then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE).then((cache) => cache.put(request, copy)).catch(() => undefined);
+        // Evitar cachear respuestas HTML de fallback para rutas desconocidas como si fueran APIs.
+        if (response.ok && request.destination !== '') {
+          const copy = response.clone();
+          caches.open(CACHE).then((cache) => cache.put(request, copy)).catch(() => undefined);
+        }
         return response;
       })
       .catch(() => caches.match(request))

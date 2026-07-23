@@ -37,18 +37,9 @@ export class ReporteComponent {
           this.resumen.set(data);
           this.cargando.set(false);
         },
-        error: (err: HttpErrorResponse) => {
-          // Fallback local: construir resumen desde inventario si el endpoint de reportes no existe aún
-          if (err.status === 404) {
-            this.cargarFallback();
-            return;
-          }
-          this.error.set(
-            (err.error && (err.error.error || err.error.mensaje)) ||
-              'No se pudo generar el reporte.'
-          );
-          this.resumen.set(null);
-          this.cargando.set(false);
+        error: () => {
+          // Si /api/reportes no está disponible, arma el resumen desde inventario.
+          this.cargarFallback();
         },
       });
   }
