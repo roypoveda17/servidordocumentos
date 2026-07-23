@@ -27,13 +27,16 @@ app.use(express.json());
 express.static.mime.define({ 'application/manifest+json': ['webmanifest'] });
 app.use((req, res, next) => {
   const p = req.path.toLowerCase();
+  res.setHeader('X-SCI-Build', '7');
   if (
     p === '/' ||
     p === '/index.html' ||
     p === '/manifest.webmanifest' ||
     p === '/sw.js' ||
+    p === '/version.json' ||
     p.endsWith('.webmanifest') ||
     p.includes('sci-icon') ||
+    p.includes('sci-brand') ||
     p.includes('favicon') ||
     p.includes('apple-touch-icon')
   ) {
@@ -56,6 +59,16 @@ async function getPool() {
   }
   return poolPromise;
 }
+
+// Health / versión — para confirmar que el deploy nuevo está vivo
+app.get('/api/version', (_req, res) => {
+  res.json({
+    name: 'SCI',
+    build: 7,
+    icon: 'sci-brand-7',
+    modules: ['consulta', 'inventario', 'reporte'],
+  });
+});
 
 // Variables en memoria para token (declaradas una sola vez)
 let haciendaToken = null;
@@ -216,7 +229,7 @@ app.use(
   express.static(distFolder, {
     setHeaders(res, filePath) {
       const base = path.basename(filePath).toLowerCase();
-      if (base === 'index.html' || base === 'sw.js' || base.endsWith('.webmanifest')) {
+      if (base === 'index.html' || base === 'sw.js' || base === 'version.json' || base.endsWith('.webmanifest')) {
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         res.setHeader('Pragma', 'no-cache');
         res.setHeader('Expires', '0');
