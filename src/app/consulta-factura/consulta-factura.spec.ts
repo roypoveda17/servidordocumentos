@@ -21,4 +21,11 @@ describe('ConsultaFacturaComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should render mobile consulta form', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('h2')?.textContent).toContain('Consulta de factura');
+    expect(compiled.querySelector('#clave')).toBeTruthy();
+    expect(compiled.querySelector('button[type="submit"]')?.textContent).toContain('Consultar');
+  });
 });

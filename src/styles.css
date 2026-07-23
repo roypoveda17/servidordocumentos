@@ -1,1 +1,56 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --sci-teal: #0f4c5c;
+  --sci-teal-dark: #0a3540;
+  --sci-accent: #38b2ac;
+  --sci-bg: #f3f7f8;
+  --sci-surface: #ffffff;
+  --sci-text: #1a2e35;
+  --sci-muted: #5b7380;
+  --sci-border: #d5e2e7;
+  --sci-danger: #b42318;
+  --sci-radius: 12px;
+  --sci-shadow: 0 8px 24px rgba(15, 76, 92, 0.08);
+  --sci-safe-top: env(safe-area-inset-top, 0px);
+  --sci-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --sci-safe-left: env(safe-area-inset-left, 0px);
+  --sci-safe-right: env(safe-area-inset-right, 0px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--sci-bg);
+  color: var(--sci-text);
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  padding-left: var(--sci-safe-left);
+  padding-right: var(--sci-safe-right);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
