@@ -23,6 +23,29 @@ const sqlConfig = {
 app.use(cors());
 app.use(express.json());
 
+// MIME y caché para PWA / iconos (evita que Android reutilice el favicon de Angular)
+express.static.mime.define({ 'application/manifest+json': ['webmanifest'] });
+app.use((req, res, next) => {
+  const p = req.path.toLowerCase();
+  if (
+    p === '/manifest.webmanifest' ||
+    p === '/sw.js' ||
+    p.endsWith('.webmanifest') ||
+    p.includes('sci-icon') ||
+    p.includes('favicon') ||
+    p.includes('apple-touch-icon')
+  ) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+  if (p === '/sw.js') {
+    res.setHeader('Service-Worker-Allowed', '/');
+    res.type('application/javascript');
+  }
+  next();
+});
+
 // Conexión persistente a SQL Server
 let poolPromise;
 async function getPool() {

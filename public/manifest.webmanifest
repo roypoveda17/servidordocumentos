@@ -1,35 +1,35 @@
 {
-  "name": "Servidor Documentos",
-  "short_name": "Documentos",
+  "name": "SCI",
+  "short_name": "SCI",
   "description": "Consulta de facturas y documentos electrónicos",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "scope": "/",
-  "id": "/",
+  "id": "/sci-app-v3",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#0F4C5C",
   "theme_color": "#0F4C5C",
   "icons": [
     {
-      "src": "/app-icon-192.png",
+      "src": "sci-icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/app-icon-512.png",
+      "src": "sci-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/app-icon-192.png",
+      "src": "sci-icon-maskable-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/app-icon-512.png",
+      "src": "sci-icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

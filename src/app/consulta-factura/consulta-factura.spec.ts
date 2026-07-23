@@ -1,18 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
 
-import { ConsultaFactura } from './consulta-factura';
+import { ConsultaFacturaComponent } from './consulta-factura';
 
-describe('ConsultaFactura', () => {
-  let component: ConsultaFactura;
-  let fixture: ComponentFixture<ConsultaFactura>;
+describe('ConsultaFacturaComponent', () => {
+  let component: ConsultaFacturaComponent;
+  let fixture: ComponentFixture<ConsultaFacturaComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ConsultaFactura]
-    })
-    .compileComponents();
+      imports: [ConsultaFacturaComponent],
+      providers: [provideHttpClient()],
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(ConsultaFactura);
+    fixture = TestBed.createComponent(ConsultaFacturaComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
