@@ -1,0 +1,146 @@
+<section class="module terminal">
+  <header class="module-header">
+    <h2>Terminal</h2>
+    <p>Caja / punto de venta SCI · IVA 13%.</p>
+  </header>
+
+  <div class="toolbar">
+    <label class="sr-only" for="buscar-terminal">Buscar producto</label>
+    <input
+      id="buscar-terminal"
+      type="search"
+      placeholder="Buscar código o nombre"
+      [ngModel]="busqueda()"
+      (ngModelChange)="busqueda.set($event)"
+      [disabled]="cargandoProductos()"
+    />
+    <button type="button" class="btn secondary" (click)="cargarProductos()" [disabled]="cargandoProductos()">
+      {{ cargandoProductos() ? 'Cargando…' : 'Actualizar' }}
+    </button>
+  </div>
+
+  @if (fuenteCatalogo()) {
+    <p class="catalog-hint">Catálogo: {{ fuenteCatalogo() }}</p>
+  }
+
+  @if (error()) {
+    <p class="notice error" role="alert">{{ error() }}</p>
+  }
+  @if (ok()) {
+    <p class="notice success" role="status">{{ ok() }}</p>
+  }
+
+  <div class="terminal-grid">
+    <section class="panel productos" aria-label="Productos">
+      <h3>Productos</h3>
+      @if (!cargandoProductos() && filtrados().length === 0) {
+        <p class="notice empty">No hay productos para mostrar.</p>
+      }
+      <div class="product-list">
+        @for (p of filtrados(); track p.id) {
+          <button type="button" class="product-btn" (click)="agregar(p)" [disabled]="cobrando()">
+            <span class="product-name">{{ p.nombre }}</span>
+            <span class="product-meta">
+              <span class="code">{{ p.codigo }}</span>
+              <span class="price">{{ crc(p.precio) }}</span>
+            </span>
+          </button>
+        }
+      </div>
+    </section>
+
+    <section class="panel carrito" aria-label="Carrito">
+      <div class="carrito-head">
+        <h3>Carrito ({{ itemsCount() }})</h3>
+        <button type="button" class="linkish" (click)="limpiar()" [disabled]="carrito().length === 0 || cobrando()">
+          Vaciar
+        </button>
+      </div>
+
+      <label class="field">
+        <span>Cliente</span>
+        <input
+          type="text"
+          autocomplete="name"
+          [ngModel]="cliente()"
+          (ngModelChange)="cliente.set($event)"
+          [disabled]="cobrando()"
+        />
+      </label>
+
+      <fieldset class="pago">
+        <legend>Pago</legend>
+        <label>
+          <input type="radio" name="pago" value="efectivo" [ngModel]="pago()" (ngModelChange)="pago.set($event)" [disabled]="cobrando()" />
+          Efectivo
+        </label>
+        <label>
+          <input type="radio" name="pago" value="tarjeta" [ngModel]="pago()" (ngModelChange)="pago.set($event)" [disabled]="cobrando()" />
+          Tarjeta
+        </label>
+        <label>
+          <input type="radio" name="pago" value="sinpe" [ngModel]="pago()" (ngModelChange)="pago.set($event)" [disabled]="cobrando()" />
+          SINPE
+        </label>
+      </fieldset>
+
+      @if (carrito().length === 0) {
+        <p class="notice empty">Tocá un producto para agregarlo.</p>
+      } @else {
+        <ul class="lineas">
+          @for (l of carrito(); track l.producto.id) {
+            <li>
+              <div class="linea-top">
+                <strong>{{ l.producto.nombre }}</strong>
+                <button type="button" class="linkish danger" (click)="quitar(l.producto.id)" [disabled]="cobrando()">
+                  Quitar
+                </button>
+              </div>
+              <div class="linea-ctrl">
+                <div class="qty">
+                  <button type="button" (click)="setCantidad(l.producto.id, l.cantidad - 1)" [disabled]="cobrando()">−</button>
+                  <input
+                    type="number"
+                    min="1"
+                    inputmode="numeric"
+                    [ngModel]="l.cantidad"
+                    (ngModelChange)="setCantidad(l.producto.id, $event)"
+                    [disabled]="cobrando()"
+                  />
+                  <button type="button" (click)="setCantidad(l.producto.id, l.cantidad + 1)" [disabled]="cobrando()">+</button>
+                </div>
+                <span class="linea-total">
+                  {{ crc(l.producto.precio * l.cantidad) }}
+                </span>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+
+      <dl class="totales">
+        <div>
+          <dt>Subtotal</dt>
+          <dd>{{ crc(subtotal()) }}</dd>
+        </div>
+        <div>
+          <dt>IVA 13%</dt>
+          <dd>{{ crc(iva()) }}</dd>
+        </div>
+        <div class="grand">
+          <dt>Total</dt>
+          <dd>{{ crc(total()) }}</dd>
+        </div>
+      </dl>
+
+      <button
+        type="button"
+        class="btn primary cobrar"
+        (click)="cobrar()"
+        [disabled]="cobrando() || carrito().length === 0"
+      >
+        {{ cobrando() ? 'Registrando…' : 'Cobrar' }}
+      </button>
+    </section>
+  </div>
+</section>

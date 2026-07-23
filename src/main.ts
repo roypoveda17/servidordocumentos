@@ -4,7 +4,7 @@ import { App } from './app/app';
 
 bootstrapApplication(App, appConfig).catch((err) => console.error(err));
 
-const SW_VERSION = 'build-7';
+const SW_VERSION = 'build-8';
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
