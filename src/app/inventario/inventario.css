@@ -19,9 +19,15 @@
 
 .toolbar {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr;
   gap: 0.55rem;
-  align-items: center;
+}
+
+@media (min-width: 420px) {
+  .toolbar {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
 }
 
 .toolbar input {

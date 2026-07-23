@@ -9,7 +9,7 @@
     <input
       id="buscar-inventario"
       type="search"
-      placeholder="Buscar por clave, cliente o estado"
+      placeholder="Buscar clave, cliente o estado"
       [ngModel]="busqueda()"
       (ngModelChange)="busqueda.set($event)"
       [disabled]="cargando()"
