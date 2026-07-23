@@ -152,6 +152,62 @@ app.post('/api/hacienda/token', async (req, res) => {
   }
 });
 
+// GET: reporte de documentos electrónicos (inventario filtrado + resumen)
+app.get('/api/reportes/documentos', async (req, res) => {
+  const { desde, hasta, estado, q } = req.query;
+  try {
+    const pool = await getPool();
+    const result = await pool.request().query('SELECT * FROM archivoshacienda');
+    let rows = result.recordset || [];
+
+    const qNorm = String(q || '').trim().toLowerCase();
+    const estadoNorm = String(estado || '').trim().toLowerCase();
+    const desdeNorm = String(desde || '').trim();
+    const hastaNorm = String(hasta || '').trim();
+
+    rows = rows.filter((doc) => {
+      const estadoDoc = String(doc.estado ?? '').toLowerCase();
+      const fecha = String(doc.fecha ?? doc.fechadocumento ?? '');
+      const blob = [
+        doc.claveelectronica,
+        doc.clave,
+        doc.cliente,
+        doc.nombrecliente,
+        doc.estado,
+      ]
+        .join(' ')
+        .toLowerCase();
+
+      if (qNorm && !blob.includes(qNorm)) return false;
+      if (estadoNorm && !estadoDoc.includes(estadoNorm)) return false;
+      if (desdeNorm && fecha && fecha < desdeNorm) return false;
+      if (hastaNorm && fecha && fecha > hastaNorm) return false;
+      return true;
+    });
+
+    const toNumber = (doc) => {
+      const raw = doc.monto ?? doc.total ?? 0;
+      const n = Number(String(raw).replace(/[^0-9.-]/g, ''));
+      return Number.isFinite(n) ? n : 0;
+    };
+
+    const aceptados = rows.filter((d) => /acept|ok|autoriz/i.test(String(d.estado ?? ''))).length;
+    const rechazados = rows.filter((d) => /rechaz|error|anul/i.test(String(d.estado ?? ''))).length;
+
+    res.json({
+      total: rows.length,
+      aceptados,
+      rechazados,
+      pendientes: Math.max(rows.length - aceptados - rechazados, 0),
+      montoTotal: rows.reduce((acc, d) => acc + toNumber(d), 0),
+      items: rows.slice(0, 100),
+    });
+  } catch (err) {
+    console.error('Error generando reporte:', err);
+    res.status(500).json({ error: 'Error generando el reporte' });
+  }
+});
+
 // Servir Angular compilado
 const distFolder = path.join(__dirname, 'dist/servidordocumentos/browser');
 app.use(express.static(distFolder));

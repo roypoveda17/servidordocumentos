@@ -1,0 +1,114 @@
+<section class="module reporte">
+  <header class="module-header">
+    <h2>Reporte</h2>
+    <p>Resumen de documentos electrónicos por período y estado.</p>
+  </header>
+
+  <form class="filters" (ngSubmit)="generar()">
+    <div class="field">
+      <label for="desde">Desde</label>
+      <input id="desde" type="date" [ngModel]="desde()" (ngModelChange)="desde.set($event)" name="desde" />
+    </div>
+    <div class="field">
+      <label for="hasta">Hasta</label>
+      <input id="hasta" type="date" [ngModel]="hasta()" (ngModelChange)="hasta.set($event)" name="hasta" />
+    </div>
+    <div class="field">
+      <label for="estado">Estado</label>
+      <select id="estado" [ngModel]="estado()" (ngModelChange)="estado.set($event)" name="estado">
+        <option value="">Todos</option>
+        <option value="aceptado">Aceptado</option>
+        <option value="rechazado">Rechazado</option>
+        <option value="pendiente">Pendiente</option>
+      </select>
+    </div>
+    <div class="field field-grow">
+      <label for="q">Buscar</label>
+      <input
+        id="q"
+        type="search"
+        placeholder="Clave o cliente"
+        [ngModel]="q()"
+        (ngModelChange)="q.set($event)"
+        name="q"
+      />
+    </div>
+    <div class="actions">
+      <button type="submit" class="btn primary" [disabled]="cargando()">
+        {{ cargando() ? 'Generando…' : 'Generar reporte' }}
+      </button>
+    </div>
+  </form>
+
+  @if (error()) {
+    <p class="notice error" role="alert">{{ error() }}</p>
+  }
+
+  @if (resumen(); as data) {
+    <div class="stats" aria-live="polite">
+      <article class="stat">
+        <h3>Total</h3>
+        <p>{{ data.total }}</p>
+      </article>
+      <article class="stat">
+        <h3>Aceptados</h3>
+        <p>{{ data.aceptados }}</p>
+      </article>
+      <article class="stat">
+        <h3>Rechazados</h3>
+        <p>{{ data.rechazados }}</p>
+      </article>
+      <article class="stat">
+        <h3>Pendientes</h3>
+        <p>{{ data.pendientes }}</p>
+      </article>
+      <article class="stat stat-wide">
+        <h3>Monto total</h3>
+        <p>{{ formatoMonto(data.montoTotal) }}</p>
+      </article>
+    </div>
+
+    <section class="detalle">
+      <h3>Detalle</h3>
+      @if (data.items.length === 0) {
+        <p class="notice empty">Sin resultados para los filtros seleccionados.</p>
+      } @else {
+        <div class="card-list">
+          @for (doc of data.items; track val(doc, 'claveelectronica', 'clave', 'id')) {
+            <article class="doc-card">
+              <div class="doc-card-top">
+                <span class="badge">{{ val(doc, 'estado') }}</span>
+                <span class="monto">{{ val(doc, 'monto', 'total') }}</span>
+              </div>
+              <h4>{{ val(doc, 'cliente', 'nombrecliente') }}</h4>
+              <p class="clave">{{ val(doc, 'claveelectronica', 'clave') }}</p>
+            </article>
+          }
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Clave</th>
+                <th>Estado</th>
+                <th>Monto</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (doc of data.items; track val(doc, 'claveelectronica', 'clave', 'id')) {
+                <tr>
+                  <td>{{ val(doc, 'cliente', 'nombrecliente') }}</td>
+                  <td class="clave">{{ val(doc, 'claveelectronica', 'clave') }}</td>
+                  <td>{{ val(doc, 'estado') }}</td>
+                  <td>{{ val(doc, 'monto', 'total') }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</section>
