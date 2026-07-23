@@ -28,6 +28,8 @@ express.static.mime.define({ 'application/manifest+json': ['webmanifest'] });
 app.use((req, res, next) => {
   const p = req.path.toLowerCase();
   if (
+    p === '/' ||
+    p === '/index.html' ||
     p === '/manifest.webmanifest' ||
     p === '/sw.js' ||
     p.endsWith('.webmanifest') ||
@@ -210,9 +212,23 @@ app.get('/api/reportes/documentos', async (req, res) => {
 
 // Servir Angular compilado
 const distFolder = path.join(__dirname, 'dist/servidordocumentos/browser');
-app.use(express.static(distFolder));
+app.use(
+  express.static(distFolder, {
+    setHeaders(res, filePath) {
+      const base = path.basename(filePath).toLowerCase();
+      if (base === 'index.html' || base === 'sw.js' || base.endsWith('.webmanifest')) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+      }
+    },
+  })
+);
 
 app.use((req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.sendFile(path.join(distFolder, 'index.html'));
 });
 

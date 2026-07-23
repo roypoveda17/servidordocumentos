@@ -4,7 +4,7 @@
   "description": "Consulta de facturas y documentos electrónicos",
   "start_url": "/?source=pwa",
   "scope": "/",
-  "id": "/sci-app-v5",
+  "id": "/sci-app-v6",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#0F4C5C",
