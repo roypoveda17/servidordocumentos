@@ -4,7 +4,7 @@ import { App } from './app/app';
 
 bootstrapApplication(App, appConfig).catch((err) => console.error(err));
 
-const SW_VERSION = 'v6';
+const SW_VERSION = 'build-7';
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -12,9 +12,7 @@ if ('serviceWorker' in navigator) {
       .register(`/sw.js?v=${SW_VERSION}`)
       .then((reg) => {
         reg.update().catch(() => undefined);
-        if (reg.waiting) {
-          reg.waiting.postMessage('SKIP_WAITING');
-        }
+        if (reg.waiting) reg.waiting.postMessage('SKIP_WAITING');
         reg.addEventListener('updatefound', () => {
           const worker = reg.installing;
           if (!worker) return;
@@ -25,12 +23,9 @@ if ('serviceWorker' in navigator) {
           });
         });
       })
-      .catch((err) => {
-        console.warn('No se pudo registrar el service worker de SCI:', err);
-      });
+      .catch((err) => console.warn('No se pudo registrar el service worker de SCI:', err));
 
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      // Recarga una sola vez cuando hay un SW nuevo para mostrar el deploy.
       const key = `sci-sw-reloaded-${SW_VERSION}`;
       if (!sessionStorage.getItem(key)) {
         sessionStorage.setItem(key, '1');
