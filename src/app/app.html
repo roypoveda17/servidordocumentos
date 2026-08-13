@@ -10,13 +10,29 @@
       />
       <div class="brand-text">
         <h1>SCI</h1>
-        <p>Documentos electrónicos · build 7</p>
+        <p>Documentos · build 9</p>
       </div>
     </div>
     <nav class="app-nav" aria-label="Módulos">
-      <a routerLink="/consulta" routerLinkActive="active">Consulta</a>
-      <a routerLink="/inventario" routerLinkActive="active">Inventario</a>
-      <a routerLink="/reporte" routerLinkActive="active">Reporte</a>
+      <a routerLink="/consulta" routerLinkActive="active">
+        <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="M20 20l-3.5-3.5"></path>
+        </svg>
+        <span>Consulta</span>
+      </a>
+      <a routerLink="/inventario" routerLinkActive="active">
+        <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h10"></path>
+        </svg>
+        <span>Inventario</span>
+      </a>
+      <a routerLink="/reporte" routerLinkActive="active">
+        <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 19V10M12 19V5M19 19v-7"></path>
+        </svg>
+        <span>Reporte</span>
+      </a>
     </nav>
   </header>
 
