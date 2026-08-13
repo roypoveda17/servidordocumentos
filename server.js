@@ -27,7 +27,7 @@ app.use(express.json());
 express.static.mime.define({ 'application/manifest+json': ['webmanifest'] });
 app.use((req, res, next) => {
   const p = req.path.toLowerCase();
-  res.setHeader('X-SCI-Build', '7');
+  res.setHeader('X-SCI-Build', '8');
   if (
     p === '/' ||
     p === '/index.html' ||
@@ -64,7 +64,7 @@ async function getPool() {
 app.get('/api/version', (_req, res) => {
   res.json({
     name: 'SCI',
-    build: 7,
+    build: 8,
     icon: 'sci-brand-7',
     modules: ['consulta', 'inventario', 'reporte'],
   });

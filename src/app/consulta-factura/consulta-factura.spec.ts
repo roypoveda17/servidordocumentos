@@ -28,4 +28,21 @@ describe('ConsultaFacturaComponent', () => {
     expect(compiled.querySelector('#clave')).toBeTruthy();
     expect(compiled.querySelector('button[type="submit"]')?.textContent).toContain('Consultar');
   });
+
+  it('should wrap a long electronic key inside the result card', async () => {
+    const clave = '50624081300310123456700100001010000000001199999999';
+    component.factura.set({
+      claveelectronica: clave,
+      nombrecliente: 'Cliente de prueba con nombre bastante largo S.A.',
+      total: '₡1.234.567,89',
+      estado: 'aceptado',
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const claveEl = compiled.querySelector('dd.wrap');
+    expect(claveEl?.textContent).toContain(clave);
+    expect(compiled.querySelector('.resultado')).toBeTruthy();
+  });
 });
