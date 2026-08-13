@@ -21,8 +21,11 @@ describe('App', () => {
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('h1')?.textContent).toContain('SCI');
-    expect(compiled.querySelector('.brand-text p')?.textContent).toContain('build 7');
+    expect(compiled.querySelector('.brand-text p')?.textContent).toContain('build 9');
     expect(compiled.querySelector('.brand-icon')).toBeTruthy();
+    expect(compiled.querySelector('.app-nav')).toBeTruthy();
+    expect(compiled.querySelectorAll('.app-nav a').length).toBe(3);
+    expect(compiled.querySelectorAll('.nav-icon').length).toBe(3);
     expect(compiled.querySelector('a[routerlink="/consulta"]')?.textContent).toContain('Consulta');
     expect(compiled.querySelector('a[routerlink="/inventario"]')?.textContent).toContain(
       'Inventario'

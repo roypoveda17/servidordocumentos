@@ -1,11 +1,11 @@
 {
   "name": "SCI",
-  "build": 7,
+  "build": 9,
   "icon": "sci-brand-7",
   "modules": [
     "consulta",
     "inventario",
     "reporte"
   ],
-  "note": "Si no ves build 7, el servidor no desplegó este código"
+  "note": "Si no ves build 9, el servidor no desplegó este código"
 }
