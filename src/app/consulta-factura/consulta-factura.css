@@ -2,6 +2,9 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .consulta-header h2 {
@@ -21,11 +24,13 @@
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
-  padding: 1rem;
+  padding: 0.85rem;
   background: var(--sci-surface);
   border: 1px solid var(--sci-border);
   border-radius: var(--sci-radius);
   box-shadow: var(--sci-shadow);
+  min-width: 0;
+  max-width: 100%;
 }
 
 .consulta-form label {
@@ -36,12 +41,15 @@
 
 .consulta-form input {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   min-height: 48px;
   padding: 0.75rem 0.85rem;
   border: 1px solid var(--sci-border);
   border-radius: 10px;
   background: #fff;
   color: var(--sci-text);
+  box-sizing: border-box;
 }
 
 .consulta-form input:focus {
@@ -92,6 +100,8 @@
   border-radius: 10px;
   font-size: 0.92rem;
   line-height: 1.4;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .notice.success {
@@ -107,11 +117,13 @@
 }
 
 .resultado {
-  padding: 1rem;
+  padding: 0.85rem;
   background: var(--sci-surface);
   border: 1px solid var(--sci-border);
   border-radius: var(--sci-radius);
   box-shadow: var(--sci-shadow);
+  min-width: 0;
+  max-width: 100%;
 }
 
 .resultado h3 {
@@ -131,6 +143,7 @@
   gap: 0.2rem;
   padding-bottom: 0.75rem;
   border-bottom: 1px solid var(--sci-border);
+  min-width: 0;
 }
 
 .resultado dl > div:last-child {
@@ -149,13 +162,28 @@
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
+  overflow-wrap: anywhere;
   word-break: break-word;
 }
 
 .resultado dd.wrap {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-weight: 500;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+@media (max-width: 379px) {
+  .consulta-form,
+  .resultado {
+    padding: 0.7rem;
+  }
+
+  .consulta-header p {
+    font-size: 0.88rem;
+  }
 }
 
 @media (min-width: 560px) {

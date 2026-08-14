@@ -2,6 +2,9 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .module-header h2 {
@@ -32,11 +35,14 @@
 
 .toolbar input {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   min-height: 48px;
   padding: 0.75rem 0.85rem;
   border: 1px solid var(--sci-border);
   border-radius: 10px;
   background: #fff;
+  box-sizing: border-box;
 }
 
 .btn {
@@ -123,6 +129,8 @@
   font-weight: 700;
   color: var(--sci-teal);
   font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .doc-card h3 {

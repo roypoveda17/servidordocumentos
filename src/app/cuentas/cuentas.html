@@ -1,0 +1,120 @@
+<section class="module cuentas">
+  <header class="module-header">
+    <div class="module-icons" aria-hidden="true">
+      <span class="icon-food">🍴</span>
+      <span class="icon-drink">🍸</span>
+    </div>
+    <h2>Gestión de Cuentas</h2>
+  </header>
+
+  <button type="button" class="btn caja" (click)="caja()">
+    Caja
+  </button>
+
+  <section class="panel" aria-label="Cuentas abiertas">
+    <div class="panel-head">
+      <h3>Cuentas Abiertas</h3>
+      <button type="button" class="btn secondary" (click)="cargar()" [disabled]="cargando()">
+        {{ cargando() ? 'Cargando…' : 'Actualizar cuentas' }}
+      </button>
+    </div>
+
+    @if (error()) {
+      <p class="notice error" role="alert">{{ error() }}</p>
+    }
+    @if (ok()) {
+      <p class="notice success" role="status">{{ ok() }}</p>
+    }
+
+    <ul class="cuenta-list">
+      <li class="cuenta-head" aria-hidden="true">
+        <span>Cuenta</span>
+        <span>Atiende</span>
+        <span>Estado</span>
+      </li>
+      @for (cuenta of cuentas(); track cuenta.id) {
+        <li>
+          <button
+            type="button"
+            class="cuenta-row"
+            [class.selected]="cuenta.id === seleccionId()"
+            (click)="seleccionar(cuenta)"
+          >
+            <span class="cuenta-nombre">{{ cuenta.nombre }}</span>
+            <span class="cuenta-atiende">{{ cuenta.atiende }}</span>
+            <span class="badge">{{ cuenta.estado }}</span>
+          </button>
+        </li>
+      } @empty {
+        <li class="notice empty">No hay cuentas abiertas.</li>
+      }
+    </ul>
+  </section>
+
+  @if (mostrarNueva()) {
+    <form class="panel nueva" (ngSubmit)="abrirNueva()">
+      <h3>Nueva cuenta</h3>
+      <label>
+        Nombre
+        <input
+          type="text"
+          name="nombre"
+          autocomplete="off"
+          [ngModel]="nuevaNombre()"
+          (ngModelChange)="nuevaNombre.set($event)"
+          required
+        />
+      </label>
+      <label>
+        Personas
+        <input
+          type="number"
+          name="personas"
+          min="1"
+          [ngModel]="nuevaPersonas()"
+          (ngModelChange)="nuevaPersonas.set($event)"
+        />
+      </label>
+      <div class="form-actions">
+        <button type="submit" class="btn primary">Abrir</button>
+        <button type="button" class="btn secondary" (click)="mostrarNueva.set(false)">Cancelar</button>
+      </div>
+    </form>
+  } @else {
+    <button type="button" class="btn nueva-cuenta" (click)="mostrarNueva.set(true)">
+      + Abrir Nueva Cuenta
+    </button>
+  }
+
+  @if (seleccionada(); as cuenta) {
+    <section class="panel detalle" aria-label="Detalle de cuenta">
+      <h3>Detalle de Cuenta - {{ cuenta.nombre }}</h3>
+      <p class="meta">Atiende: {{ cuenta.atiende }} | {{ cuenta.personas }} Persona{{ cuenta.personas === 1 ? '' : 's' }}</p>
+
+      <button type="button" class="btn secondary" (click)="mostrarProductos.set(!mostrarProductos())">
+        Productos
+      </button>
+
+      @if (mostrarProductos()) {
+        <ul class="product-list">
+          @for (p of productos(); track p.id) {
+            <li>
+              <button type="button" class="product-btn" (click)="agregarProducto(p)">
+                <span>{{ p.nombre }}</span>
+                <span class="price">₡{{ p.precio }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+
+      <ul class="lineas">
+        @for (item of cuenta.items; track item.id) {
+          <li>{{ item.cantidad }}x {{ item.nombre }}</li>
+        } @empty {
+          <li class="notice empty">Sin productos en esta cuenta.</li>
+        }
+      </ul>
+    </section>
+  }
+</section>

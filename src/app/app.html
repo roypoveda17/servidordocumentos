@@ -1,23 +1,60 @@
 <div class="app-shell">
-  <header class="app-header">
-    <div class="brand">
-      <img
-        class="brand-icon"
-        src="sci-brand-7-192.png"
-        width="40"
-        height="40"
-        alt="Icono SCI"
-      />
-      <div class="brand-text">
-        <h1>SCI</h1>
-        <p>Documentos electrónicos · build 7</p>
+  <header class="factura-header">
+    <div class="factura-top">
+      <p class="factura-brand" title="SCI-FacturaElectrónica">
+        <span class="brand-short">SCI Factura</span>
+        <span class="brand-full">SCI-FacturaElectrónica</span>
+      </p>
+      <label class="factura-company">
+        <span class="sr-only">Empresa</span>
+        <select
+          [ngModel]="empresaId()"
+          (ngModelChange)="empresaId.set($event)"
+          [attr.title]="empresaLabel()"
+        >
+          @for (emp of empresas(); track emp.id) {
+            <option [value]="emp.id">{{ emp.nombre }} ({{ emp.identificacion }})</option>
+          }
+        </select>
+      </label>
+      <button
+        type="button"
+        class="factura-menu-btn"
+        (click)="menuOpen.set(!menuOpen())"
+        [attr.aria-expanded]="menuOpen()"
+        aria-controls="factura-drawer"
+        aria-label="Menú"
+      >
+        <span class="hamburger" aria-hidden="true"></span>
+      </button>
+    </div>
+
+    <div class="factura-info">
+      <p class="factura-rates">
+        <span>Compra: ₡{{ compra() }}</span>
+        <span>Venta: ₡{{ venta() }}</span>
+      </p>
+      <div class="factura-links">
+        <a
+          class="factura-link"
+          href="https://wa.me/?text=Soporte%20SCI%20FacturaElectr%C3%B3nica"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Soporte WhatsApp
+        </a>
+        <button type="button" class="factura-link salir" (click)="salir()">Salir</button>
       </div>
     </div>
-    <nav class="app-nav" aria-label="Módulos">
-      <a routerLink="/consulta" routerLinkActive="active">Consulta</a>
-      <a routerLink="/inventario" routerLinkActive="active">Inventario</a>
-      <a routerLink="/reporte" routerLinkActive="active">Reporte</a>
-    </nav>
+
+    @if (menuOpen()) {
+      <nav id="factura-drawer" class="factura-drawer" aria-label="Módulos">
+        <a routerLink="/cuentas" routerLinkActive="active" (click)="menuOpen.set(false)">Cuentas</a>
+        <a routerLink="/consulta" routerLinkActive="active" (click)="menuOpen.set(false)">Consulta</a>
+        <a routerLink="/inventario" routerLinkActive="active" (click)="menuOpen.set(false)">Inventario</a>
+        <a routerLink="/reporte" routerLinkActive="active" (click)="menuOpen.set(false)">Reporte</a>
+      </nav>
+    }
   </header>
 
   <main class="app-main">

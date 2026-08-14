@@ -27,7 +27,7 @@ app.use(express.json());
 express.static.mime.define({ 'application/manifest+json': ['webmanifest'] });
 app.use((req, res, next) => {
   const p = req.path.toLowerCase();
-  res.setHeader('X-SCI-Build', '7');
+  res.setHeader('X-SCI-Build', '9');
   if (
     p === '/' ||
     p === '/index.html' ||
@@ -64,9 +64,9 @@ async function getPool() {
 app.get('/api/version', (_req, res) => {
   res.json({
     name: 'SCI',
-    build: 7,
+    build: 9,
     icon: 'sci-brand-7',
-    modules: ['consulta', 'inventario', 'reporte'],
+    modules: ['cuentas', 'consulta', 'inventario', 'reporte'],
   });
 });
 
@@ -221,6 +221,99 @@ app.get('/api/reportes/documentos', async (req, res) => {
     console.error('Error generando reporte:', err);
     res.status(500).json({ error: 'Error generando el reporte' });
   }
+});
+
+const DEMO_PRODUCTOS_BAR = [
+  { id: 'sil350', codigo: 'SIL350', nombre: 'Silver 350ML', precio: 1500 },
+  { id: 'imp350', codigo: 'IMP350', nombre: 'Imperial 350ML', precio: 1400 },
+  { id: 'caf001', codigo: 'CAF001', nombre: 'Café americano', precio: 1200 },
+  { id: 'agua01', codigo: 'AGU001', nombre: 'Agua 600ml', precio: 700 },
+];
+
+let cuentasBar = [
+  {
+    id: 'cta-1',
+    nombre: 'camisa verde',
+    atiende: '05',
+    estado: 'Abierta',
+    personas: 1,
+    items: [{ id: 'sil350', nombre: 'Silver 350ML', cantidad: 2, precio: 1500 }],
+  },
+  { id: 'cta-2', nombre: 'javi', atiende: '05', estado: 'Abierta', personas: 1, items: [] },
+  { id: 'cta-3', nombre: 'BARRA-01', atiende: '05', estado: 'Abierta', personas: 1, items: [] },
+];
+
+function formatTipoCambio(value, fallback) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n.toFixed(2) : fallback;
+}
+
+app.get('/api/bar/sesion', async (_req, res) => {
+  let compra = '446.85';
+  let venta = '452.18';
+  try {
+    const tc = await axios.get('https://api.hacienda.go.cr/indicadores/tc/dolar', { timeout: 4000 });
+    const data = tc.data || {};
+    compra = formatTipoCambio(data.compra?.valor ?? data.compra, compra);
+    venta = formatTipoCambio(data.venta?.valor ?? data.venta, venta);
+  } catch (_) {
+    /* usa fallback */
+  }
+  res.json({
+    empresas: [{ id: 'hottsun', nombre: 'HOTTSUN S.A.', identificacion: '3101467571' }],
+    compra,
+    venta,
+  });
+});
+
+app.get('/api/bar/cuentas', (_req, res) => {
+  res.json(cuentasBar);
+});
+
+app.post('/api/bar/cuentas', (req, res) => {
+  const nombre = String(req.body?.nombre || '').trim();
+  const personas = Math.max(1, Math.floor(Number(req.body?.personas) || 1));
+  if (!nombre) {
+    return res.status(400).json({ error: 'El nombre de la cuenta es obligatorio.' });
+  }
+  const cuenta = {
+    id: `cta-${Date.now()}`,
+    nombre,
+    atiende: '05',
+    estado: 'Abierta',
+    personas,
+    items: [],
+  };
+  cuentasBar.unshift(cuenta);
+  res.status(201).json(cuenta);
+});
+
+app.get('/api/bar/productos', (_req, res) => {
+  res.json({ productos: DEMO_PRODUCTOS_BAR });
+});
+
+app.post('/api/bar/cuentas/:id/productos', (req, res) => {
+  const cuenta = cuentasBar.find((c) => c.id === req.params.id);
+  if (!cuenta) {
+    return res.status(404).json({ error: 'Cuenta no encontrada.' });
+  }
+  const producto = DEMO_PRODUCTOS_BAR.find((p) => p.id === String(req.body?.productoId || ''));
+  if (!producto) {
+    return res.status(400).json({ error: 'Producto no válido.' });
+  }
+  const cantidad = Math.max(1, Math.floor(Number(req.body?.cantidad) || 1));
+  const linea = cuenta.items.find((it) => it.id === producto.id);
+  if (linea) {
+    linea.cantidad += cantidad;
+  } else {
+    cuenta.items.push({
+      id: producto.id,
+      nombre: producto.nombre,
+      cantidad,
+      precio: producto.precio,
+    });
+  }
+  res.json(cuenta);
 });
 
 // Servir Angular compilado
