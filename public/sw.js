@@ -1,5 +1,5 @@
-/* Service worker SCI build 8 — network-first, iconos sci-brand-7. */
-const CACHE = 'sci-shell-build-8';
+/* Service worker SCI build 9 — network-first, iconos sci-brand-7. */
+const CACHE = 'sci-shell-build-9';
 const PRECACHE = [
   '/manifest.webmanifest',
   '/sci-brand-7-192.png',

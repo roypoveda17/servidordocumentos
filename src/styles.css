@@ -26,8 +26,9 @@ html,
 body {
   margin: 0;
   min-height: 100%;
+  width: 100%;
   max-width: 100%;
-  overflow-x: clip;
+  overflow-x: hidden;
   background: var(--sci-bg);
   color: var(--sci-text);
   font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
@@ -38,6 +39,14 @@ body {
 body {
   padding-left: var(--sci-safe-left);
   padding-right: var(--sci-safe-right);
+}
+
+app-root {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 button,
